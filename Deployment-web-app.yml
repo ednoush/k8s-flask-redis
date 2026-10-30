@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portofolio-app-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: portofolio-app
+  template:
+    metadata:
+      labels:
+        app: portofolio-app
+    spec:
+      securityContext:
+        runAsUser: 1002
+        runAsGroup: 3002
+      serviceAccountName: my-service-account
+      containers:
+      - name: portofolio-app
+        image: ednoush01/portofolio-app:v1
+        ports:
+          - containerPort: 5000
+        env:
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: map-api
+              key: APP_NAME
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: map-api
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:  
+              name: map-api
+              key: REDIS_PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: map-api
+              key: LOG_LEVEL
+        - name: REDIS_PASSWORD
+          valueFrom:
+             secretKeyRef:
+               name: file-secret
+               key: REDIS_PASSWORD
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "250m"
+            memory: "128Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: file-secret
+      securityContext:
+        runAsUser: 1002
+        runAsGroup: 3002
+      containers:
+      - name: redis-db
+        image: redis:latest
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "250m"
+            memory: "128Mi"      
