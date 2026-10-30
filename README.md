@@ -1,4 +1,4 @@
-# k8s-portfolio-app
+# k8s-redis-flask
 
 Ce projet permet de déployer une application multi-tiers (API Flask + Redis) sur Kubernetes en appliquant les bonnes pratiques de sécurité.
 Ce projet a été réalisé dans le cadre de ma préparation à la certification CKAD (formation KodeKloud).
